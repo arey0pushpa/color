@@ -58,8 +58,6 @@
 {\Large
 \textbf\newline{Model checking vesicular transport system}}
 
-\newline
-\\
 Ankit Shukla, Kuppaswamy Lakshman 
 \\
 \bigskip
@@ -76,46 +74,32 @@ Chennai mathematical institute
 Modeling biological is an art. Biological systems are very complex in comparison to the computer system that we currently can build, for example a human body is a perfect example of the complexity involved in the system. So in order to understand these complex systems, besides experimenting the best way is to make simpler elegant model with suitable abstraction of biological systems and try to encode them as a computer programs. To understand the biological system we need some additional machinary besides simulation and stastical analysis. This paper presents two such model and proposed method that can handle the scalibilty problems and prdict precise results as opposed to a statistical one. We use model chekers (Boolean satisficability, SAT) as a framework to encode and analyze these model. We claim that these tools are suitable for biological systems which require combinotorial analysis of the stated rules and with possibly large state space.
 
 \section{Fusion in eukaryotik cell}
-The process of vesicle traffic system is four steps linear process (Fig.1) involving:  
+The delivery of molecular cargo is essential for cell functioning and its survival. Specificity is required for essential functions in the cell for example sending signel to neighbouring nerve cell. Likewise, specificity is required for the export of hormones such as insulin to the cell surface. Intracellular organisation of eukaryotic cells is far more complex different from that of the prokaryotic cells. Distinct cellular processes in eukaryot are compartmentalised. This improves efficiency of the whole sytem but a critical problem surfaces. Now for the transport of the molecules different compartments need to exchange specific molecules and certain molecules need to be exported to the exterior of the cell. As its a case that most molecules are too large to directly pass through membranes, a mechanism is required to deliver the cargo from one compartement to another.
+
+The process of vesicle transporting the cargo molecules can be thought as a several steps linear process (Fig.1) mainly involving:  
 \begin{enumerate}
 \item Sorting of cargo molecules from the source compartment for packaging into the vesicle.
 \item Budding of the vesicle.
-\item Tethering of the vesicle to the target compartment.
+\item Uncoating and Tethering of the vesicle to the target compartment.
 \item Vesicle fusion.
 \end{enumerate}
-We can understand the whole fusion process similar to that of a cargo transfer. First the sorting of the cargo to be shipped happens and then cargo left for the target on some transpoting structure and at the end shipped to the destination. Few points are trivially not clear such as how vesicle (cargo) finds (knows) its destination?
+We can understand the whole process of molecule transfer similar to that of a cargo transfer on a sea-shore. First step involves the sorting of the cargo molecules to be shipped, then cargo left for the target on a vesicle (small container of molecules) and at the end the cargo molecules shipped to its destination. With this basic picture few trivial question arises such as: how vesicle (cargo) finds (knows) its destination? Rothman, Schekman and Sudhof have discovered different parts of this mechninary, basically chemical specificity between SNARE's [0] dictates the fusion mechanism.
 
 \begin{figure}[!ht]
-  \caption{Mechanics of traffic. The sequence of events that take place during vesicle-transport and the role of the major classes of traffic molecules is shown here.}
+  \caption{Mechanics of vesicle traffic sytem. The sequence of events that take place during vesicle-transport and the role of the major classes of traffic molecules is shown here.}
   \centering
-   \includegraphics[width=0.60\textwidth]{2.jpg}
+   \includegraphics[width=0.95\textwidth]{2.jpg}
 \end{figure}
 
 Complete details of these process can be found at [1-6] and we'll assume that it's evident what is happening. 
  
-\section{Introduction} Molecular interactions regulate the movement of transport vesicles between the membrane-bound compartments of eukaryotic cells [Rothman, 2002; Munro, 2004]. Rothman, Schekman and Sudhof were awarded the Nobel Prize for identifying key molecules involved in this process. These include: Arf and Rab GTPases whose presence or absence encodes compartment identity [Stenmark, 2009]; coat proteins that regulate molecular loading from source compartments onto vesicles [Robinson, 2004]; and SNARE proteins that regulate fusion of vesicles into target compartments [Jahn \& Scheller, 2006; Wickner \& Schekman, 2008].
+\section{Introduction} Molecular interactions regulate the movement of transport vesicles between the membrane-bound compartments of eukaryotic cells [7]. Rothman, Schekman and Sudhof were awarded the Nobel Prize for identifying key molecules involved in this process. These include: Arf and Rab GTPases whose presence or absence encodes compartment identity [8]; coat proteins that regulate molecular loading from source compartments onto vesicles [7]; and SNARE proteins that regulate fusion of vesicles into target compartments [9].
 
-These molecules form the basis of an abstract representation of vesicle traffic [Mani \& Thattai, 2016a; Mani \& Thattai, 2016b]: compartments are the nodes, and vesicles are the directed edges, of a transport graph; different molecules move in cyclical fluxes along this graph; the properties of compartments and vesicles are defined by the molecules they contain. 
+These molecules form the basis of an abstract representation of vesicle traffic [10]: compartments are the nodes, and vesicles are the directed edges, of a transport graph; different molecules move in cyclical fluxes along this graph; the properties of compartments and vesicles are defined by the molecules they contain. 
 
-In particular, we focus on the transmembrane SNARE proteins, which form a key part of the cellular addressing system. The fusion of a vesicle to a target compartment is driven by the zipping together of SNAREs [Jahn \& Scheller, 2006; Wickner \& Schekman, 2008]. In their fusion-competent state, SNAREs form a four-helix bundle: three components of this bundle are Q-SNAREs, the fourth is an R-SNARE. Both vesicles and their target compartments will contain SNAREs. Typically the Q-SNARE triple-helix is confined to one membrane surface, while the R-SNARE is confined to its fusion partner. (In the older literature SNAREs were often separated into vesicle v-SNAREs and target compartment t-SNAREs; however, it is now clear that SNAREs can act bi-directionlly, or even during homotypic fusion, so we use the more explicit Q/R classification.)
-
-There are many types of Q-SNAREs and R-SNAREs spread between different vesicles and compartments. Only certain Q-SNAREs can zip with certain R-SNAREs, regulating precisely which vesicles fuse with which targets. Molecules such as GTPases and Sec/Munc proteins on vesicles and compartments can activate or inhibit SNAREs [Rossi et al., 2004; Stenmark, 2009]. For the purposes of our analysis we consider a Q-SNARE triple helix as a single complex, and the R-SNARE as its cognate partner. Crucially, the zipping of a single active SNARE complex on a vesicle with a single active SNARE complex on a compartment is necessary and sufficient for fusion [van den Bogaart et al., 2010]; we refer to this as SNARE pairing. Once a SNARE pairing drives a fusion event, the NSF protein uses the energy of ATP hydrolysis to split apart the four-helix bundle into its constituent Q and R components. NSF is present on all compartments of a eukaryotic traffic system, but is not found in appreciable quantities on vesicles.
-
-
-\section{Previous work of use of formal methods in Biology}
-
-Formal verification techniques are already used for aiding various
-aspects of biological research [11,13,16,15,22]. In particular, the robustness of models of biochemical systems with respect to temporal properties has been studied [18,6,19]. Our work is, to the best of our knowledge, the initial application of formal verification to studying the vesicle traffic regulatory networks and, as such, it opens up a novel application area for the formal verification community. As previously discussed, with respect to related studies in simulation based vesile traffic system [mani ad Thattai] our method can offer a higher degree of assurance, more accuracy, and better scalability than the traditional, simulation based approaches. 
-
-Computing has contributed to the biological sciences by making it possible to store and analyze large amounts of experimental data. Recently, the development and application of computational methods and models that capture key biological processes and mechanisms is increasingly utilized towards helping biologists in gaining a clearer understanding of living systems and improving predictive capabilities. The ability to effectively explore and analyze such biological models is key to making scientific progress in the field.
+In particular, we focus on the transmembrane SNARE proteins, which form a key part of the cellular addressing system. The fusion of a vesicle to a target compartment is driven by the zipping together of SNAREs [7;8]. In their fusion-competent state, SNAREs form a four-helix bundle: three components of this bundle are Q-SNAREs, the fourth is an R-SNARE. Both vesicles and their target compartments will contain SNAREs.
 
 \section*{Cell evolution and color problem}
-
-\section{Color Encoding problem}
-\subsection{Problem statement}
-Given a valid vesicle traffic system in which all molecules are recycled (i.e. all paths are cyclic) and all vesicles are distinct (3-connected), what is the minimum number of coat proteins that are
-required. Abstractly to find the minimum number of masks (we'll connect the coat proteins to mask in the traffic system in future sections) that is required in order to satisfy vesicle traffic rules in steady-state condition (every leaving molecule is recycled). 
-
 \subsection{Introduction }
 \textit{Eukaryotic cells are filled with membrane-bound compartments, each of which has a characteristic size, shape and protein composition. During the life of the cell, proteins are constantly being transported inside vesicular carriers from one compartment to another, yet the structure and make-up of each compartment remain more or less constant. This implies that there must be a balance between outgoing and incoming
 membrane traffic and, furthermore, that the cell must be able to transport proteins selectively, discriminating between proteins that need to move on to another compartment and proteins that need to remain behind. Thus, the process of vesicle formation must be tightly regulated, both quantitatively and qualitatively.}
@@ -123,7 +107,17 @@ membrane traffic and, furthermore, that the cell must be able to transport prote
 
 \textit{Studies on clathrin-coated vesicles provided the first indication that the coat may serve two purposes: to deform the membrane into a budding vesicle and to select the contents of that vesicle.} Our focus will be on the second. 
 
-We think the whole cell traffic network as a graph. In the topology of the graph, nodes are compartments of the molecules and molecules from one compartment to another travel via a smaller compartment (container) called vesicle. Vesicles carry molecules present on the source node and transfer them to the target compartment i.e only subset molecules present on the nodes are allowed to flow via vesicle. We can think this mechanism as molecule flow from compartments have some form of mask. We represent these vesicles as edges on the graph, where the direction of edge provide information about the source and target compartment and with every edge there is an associated mask. The whole vesicular system is a recyclable network. i.e every outgoing molecule is coming back to its original source node via a cycle. The problem is to come up with the minimized masks that is compatible with the valid system. 
+We think the whole cell traffic network as a graph. In the topology of the graph, nodes are compartments of the molecules and molecules from one compartment to another travel via a smaller compartment (container) called vesicle. Vesicles carry molecules present on the source node and transfer them to the target compartment i.e only subset molecules present on the nodes are allowed to flow via vesicle. We can think this mechanism as molecule flow from compartments have some form of mask, i.e not all present molecules are allowed to go out on vesicle. We represent these vesicles as edges in the graph, the direction of the edge provides information about the source and target compartment and with every edge there is an associated mask. The whole vesicular system is a recyclable network. i.e every outgoing molecule is coming back to its original source node via a cycle. The problem is to come up with the minimized masks that is compatible with the valid system. 
+
+\section{Color encoding problem}
+Given a valid vesicle traffic system in which all molecules are recycled (i.e. all paths are cyclic) and all vesicles are distinct (3-connected \footnote{A graph is k-edge-connected if there does not exist a set of k-1 edges whose removal disconnects the graph (Skiena 1990, p. 177)}), what is the minimum number of coat proteins that are required. Abstractly, to find the minimum number of masks (we'll connect the coat proteins to mask of the traffic system in future sections) that is required in order to satisfy vesicle traffic rules in steady-state condition (molecules are recycled). 
+
+\section{Previous work of use of formal methods in Biology}
+
+Formal verification techniques are already used for aiding various
+aspects of biological research [13-18]. In particular, the robustness of models of biochemical systems, modelling gene regulatory networks [18-20]. Our work is, to the best of our knowledge, the initial application of formal verification to studying the vesicle traffic regulatory networks also it opens up a novel application area for the formal verification community. With respect to related studies in simulation based vesile traffic system [10] our method can offer a higher degree of assurance, more accuracy, and better scalability than the traditional, simulation based approaches. 
+
+Computing has contributed to the biological sciences by making it possible to store and analyze large amounts of experimental data. Recently, the development and application of computational methods and models that capture key biological processes and mechanisms is increasingly utilized towards helping biologists in gaining a clearer understanding of living systems and improving predictive capabilities. The ability to effectively explore and analyze such biological models is key to making scientific progress in the field.
 
 \subsection{Overview of the model} There are two kinds of nodes in the system: compartments and vesicles. Compartments are all in steady state (recyclable). There are budding edges going from compartments to vesicles and fusion edges going from vesicles to compartments.
 
@@ -140,23 +134,20 @@ For each vesicle, we find the inclusion set (set of molecules that are present o
 coat responsible.
 We then define a coat incompatibility graph, where the nodes represent coats. Two nodes are adjacent if (I1 intersection E2) OR (I2 intersection E1) is not empty. The minimum number of colors in this graph represents the minimum number of coat proteins required in the system.
 
-\textbf{Mathematical view} This as a black box procedure. By solving the matrix multiplication procedure A mult B  where 2 - D matrix A represents the graph (1 in matrix : means  inflow -1 means outflow , others 0) and other 2-D matrix represent whether a type of molecule present at which compartment. Equating to multiplication to get stability condition cause whole cause representing them as equations form resulting into a form that implies that for stability there has to be cycles, vesicle flow over a cycle is conserved. 
-
+\textbf{Mathematical view} We can think this as a black box procedure. By solving the matrix multiplication procedure A mult B  where 2 - D matrix A represents the graph (1 in matrix : means  inflow -1 means outflow , others 0) and other 2-D matrix represent whether a type of molecule present at which compartment. Equating multiplication to a get stability condition cause whole cause representing them as equations form resulting into a form that implies that for stability there has to be cycles, vesicle flow over a cycle is conserved. 
 
 \subsection{Modeling}
-We modeled the system as a SAT problem by using bounded model checker CBMC. In comparison to simulation methods model checking turn out to very efficient way of solving this kind of problem. Rather than coding the properties directly we did some preprocessing to minimize the unwinding that CBMC (bounded model checker we have used) takes. 
+We modeled the system as a SAT problem by using \textit{bounded model checker CBMC (C-bounded model checker}. In comparison to simulation methods, model checking turn out to be very efficient way of solving this kind of problem. Rather than coding the properties directly we did some preprocessing to minimize the unwinding that CBMC takes. 
 
-%% \textbf{Goal:} One of his student getting results via doing sampling : she is able to find the solution till N = 6.  This is similar to finding / asking things from 2 \^ 2 \^ N possibilities. Mukund wants results for N = 20. And it looks like a model checking problem. 
-%
 The input will be a graph where a node represents a compartment. Vesicle are moving out as edges. There is an inflow and outflow of the vesicles. With each possible edge, we assign a corresponding mask, that might not be unique. 
 
-\textbf{Prob Statement:} Find the minimum number of mask that is required to make sure that following conditions are met:
+\textbf{Prob Statement:} In terms of graph representation problem can be viewed as: find the minimum number of mask that is required to make sure that following conditions are met:
 \begin{enumerate}
-\item Graph is strongly connected.
-\item Graph is Three  Connected.
+\item System is in steady state (every graph cut balances inflow-outflow flux).
+\item Underlying undirected graph is 3-connected.
 \end{enumerate}
 
-Steady state condition specifies that every leaving molecule come back to its source node via a cycle. This is the basis for recycling of SNARES.
+Steady state condition or homeostasis requirement for the whole system is the basis for recycling of SNARES. It states that every leaving molecule come back to its source node via a cycle. Mathematically it means that the network admits a non-negative cycle basis. 
 
 We can state this specification regarding graph-cuts, that is each edge-graph-cut should maintain the inflow-outflow flux or as a property of assignment of molecules, such that each for each leaving molecule there is a cycle where that molecule is present on every edge and hops taken. Required Specification is listed in Listing 1. For efficiency reasons we'll divide the whole case into two as stated in last chapter.
 
@@ -189,15 +180,13 @@ Now consider associating with each possible edge a mask. That will determine the
 Lets make a graph that have 3 Nodes representing three compartments . And 1 - 3 (inflow to Node three from 1) 3 - 1 {outflow from three to 1} 3 - 2 { outflow from 3 to 2} , 1 - 2 , 2 - 1 hence total 5 Edges and three Nodes. 
 Three Cycles are preset. 1 - 2 - 1, 1 - 3 - 1, 1 - 3 - 2 - 1. 
 
+\begin{figure}[!ht]
+  \caption{Graph to describe the network structure.}
+  \centering
+   \includegraphics[width=0.85\textwidth]{1.png}
+\end{figure}
 
-\textbf{ADD DIAGRAN OF THE GRAPH}
-
-
-Rules : A Physical system system is allowed if :
-   1. Strongly connected. 
-   2. Three connected.
-
-There are substances that are present in at a compartment and few / all might be flowing through the a  edges and hence outgoing substance has to be present at the compartment. So we require in this case at least log 5 $\simeq$ 3 substances. 
+There are substances that are present in at a compartment and few/all might be flowing through the a  edges and hence outgoing substance has to be present at the compartment. So we require in this case at least log 5 $\simeq$ 3 substances. 
 Represent the matrix for the substance as a binary switch whether its present in a loop or not. 1 1 1 would mean that that substance is present at all the three loops. Reduce the binary switch to a graph coloring problem and solve the same to find the minimum required color. 
 
 \subsection{Analysis}
@@ -230,7 +219,7 @@ This representation will cause additional book-keeping tasks but was very useful
 
 We represent nodes (compartments in the cell) in the graph as a bitvector of fixed length M (Total types of the molecules), representing information about the presence or absence of the molecule type at the i\textsuperscript{th} place.
 
-We fix the graph as input. Then have created a preprocessing by making the edge as a C programming language structure, that consists of each node having additional information attached to it which we can later use just by one lookup. This includes the source and target node i,j and the bitvector representing the edge (edgeWeight), the chosen mask and inclusion and exclusion set.   
+We fix the graph as input. Then have created a preprocessing by making the edge as a C programming language structure, that consists of each node having additional information attached to it which we can later use by one lookup. The structure includes source and the target node i,j and bitvector representing the label of the edge (edgeWeight), chosen mask, inclusion and exclusion set.   
 
 \begin{lstlisting}[mathescape,
   breaklines,
@@ -238,7 +227,7 @@ We fix the graph as input. Then have created a preprocessing by making the edge 
   caption= \textbf{Necessary condition property.}
 ]
 # Define a structure to represent the EdgeBag that is a tuple :
-# edgeBag := (i, j, edgeWeight, mask, inclusionSet, exclusionSet
+# edgeBag := (i, j, edgeWeight, mask, inclusionSet, exclusionSet)
 struct EdgeBag
  {
    int ith;
@@ -254,7 +243,9 @@ struct EdgeBag
 struct EdgeBag edgeBag[len];     
 \end{lstlisting}
 
-But we still need and initiation of the structure. To initialize we just fix source and target  node and leave everything else as it is; i.e all possible assignments. 
+But we still need and initiation of the structure. To initialize we just fix source and target node and allow rest to take an arbitrary value; i.e all possible assignments. Later we'll put constraint on these values and use variable involved in the property check.
+
+\[ \bigwedge\limits_{i,j} g_{i,j} \supset (e_{i,j,p}  \lor r_{j,i,k,1} \lor ... \lor r_{j,i,k,p}) \, \]
 
 \begin{lstlisting}[mathescape,
   breaklines,
@@ -262,7 +253,7 @@ But we still need and initiation of the structure. To initialize we just fix sou
   caption= \textbf{Necessary condition property.}
 ]
 # Set ith jth position and edgeweight to the position of
-  edgeBag[len] array 
+  edgeBag[len] array. 
 
 edgePos = 0;
 for(i=0; i<N; i++) {
@@ -377,31 +368,6 @@ Most enthusiastic result of these project was some times model checkers performs
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\\
-\\
-\\
 
 \subsection{Introduction}
 Central problem of cell biology is to understand the working of cell growth (and shrink). 
