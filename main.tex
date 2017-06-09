@@ -9,6 +9,10 @@
 \usepackage[utf8]{inputenc}
  % Added for the multi-column 
 \usepackage[british]{babel}
+
+% I added for arrows
+\usepackage{textcomp}
+
 \usepackage{hhline}
 \usepackage{multirow}
 \usepackage[figurename=Fig]{caption}
@@ -149,6 +153,138 @@ The input will be a graph where a node represents a compartment. Vesicle are mov
 
 Steady state condition or homeostasis requirement for the whole system is the basis for recycling of SNARES. It states that every leaving molecule come back to its source node via a cycle. Mathematically it means that the network admits a non-negative cycle basis. 
 
+\subsubsection{Mask}
+Now consider associating with each possible edge a mask. That will determine the molecule outflow possibility.
+ 
+Lets make a graph that have 3 Nodes representing three compartments . And 1 $\,\to\,$ 3 (inflow to Node three from 1) 3 $\,\to\,$ 1 {outflow from three to 1} 3 -$\,\to\,$ 2 {outflow from 3 to 2} , 1 $\,\to\,$ 2 , 2 $\,\to\,$ 1 hence total 5 Edges and three Nodes. 
+Three Cycles are preset. 1 $\,\to\,$ 2 $\,\to\,$ 1, 1 $\,\to\,$ 3 $\,\to\,$ 1, 1 $\,\to\,$ 3 $\,\to\,$ 2 $\,\to\,$ 1. 
+
+\begin{figure}[!ht]
+  \caption{\textbf{Graph to describe the network structure.} The large circules in the graph represent compartments and the smaller ones are vesicles. we can see the all the possible cycles present in the graph. }
+  \centering
+   \includegraphics[width=0.90\textwidth]{1.png}
+\end{figure}
+
+There are substances that are present in at a compartment and few/all might be flowing through the a  edges and hence outgoing substance has to be present at the compartment. So we require in this case at least log 5 $\simeq$ 3 substances. 
+Represent the matrix for the substance as a binary switch whether its present in a loop or not. 1 1 1 would mean that that substance is present at all the three loops. Reduce the binary switch to a graph coloring problem and solve the same to find the minimum required color. 
+
+\subsection{Analysis}
+Learning from our previous project where unwindings was really a problem and program was taking too much time before reaching into SAT solving phase we represented graph as 1 dimensional array which have edge between n and n+1\textsuperscript{th} element. 
+
+\begin{figure}[ht]
+%\vspace{-3mm}
+\begin{verbatim}
+# G[2N]: Graph with width twice as number of nodes.
+# Graph is 3 connected.
+#define N 5
+#define X 2*N
+...
+unsigned int G[X];   
+\end{verbatim}
+\caption{Graph encoding.}
+\label{code:motivate}
+\end{figure}
+ 
+ 
+ 
+This representation will cause additional book-keeping tasks but was very useful to decrease the loop unwinding in our code. In our Listing to illustrate the code with better readability we will assume that the graph is represented as a two dimensional matrix where G[i][j], G[i][j] = 1; there is an edge between node i and node j.
+
+% \begin{lstlisting}[mathescape,
+%   breaklines,
+%   frame=single,
+%   caption= \textbf{Readable encoding of the graph}
+% ]
+% #define N 5
+% ...
+% _Bool G[N][N];
+% \end{lstlisting}
+
+We represent nodes (compartments in the cell) in the graph as a bitvector of fixed length M (Total types of the molecules), representing information about the presence or absence of the molecule type at the i\textsuperscript{th} place.
+
+We fix the graph as input. Then have created a preprocessing by making the edge as a C programming language structure, that consists of each node having additional information attached to it which we can later use by one lookup. The structure includes source and the target node i,j and bitvector representing the label of the edge (edgeWeight), chosen mask, inclusion and exclusion set. 
+We can think edgeWeight as Boolean function with variable e\_{i,j,p} i,j range over to N (no of nodes) and p range from (0,5)
+
+
+\begin{lstlisting}[language=Python,
+mathescape,
+ breaklines,
+  rulecolor=\color{black},
+  frame=single,
+  caption= \textbf{Logical encoding of the edgeBag.}
+]
+
+edge = [[[ Bool ("e_{}_{}_{}".format(i,j,p)) for p in range(5)] for j in range(N)] for i in range(N)] 
+
+\end{lstlisting}
+
+
+\begin{figure}[ht]
+%\vspace{-3mm}
+\begin{verbatim}
+# Define a structure to represent the EdgeBag that is a tuple :
+# edgeBag := (i,j,edgeWeight,mask,inclusionSet,exclusionSet)
+
+struct EdgeBag
+ {
+   int ith;
+   int jth;
+   bitvector edgeWeight;
+   bitvector mask;
+   bitvector inclusionSet;
+   bitvector exclusionSet;
+ };
+ 
+....
+# Create a structure that will contain edges. 
+struct EdgeBag edgeBag[len];     
+
+\end{verbatim}
+\caption{Define a structure and represent edge with it.}
+\label{code:motivate}
+\end{figure}
+ 
+
+But we still need and initiation of the structure. To initialize we just fix source and target node and allow rest to take an arbitrary value; i.e all possible assignments. Later we'll put constraint on these values and use variable involved in the property check.
+
+\[ \bigwedge\limits_{i,j} g_{i,j} \supset (e_{i,j,0} == i \land e_{i,j,1} == j) \, \]
+
+%\begin{lstlisting}[language=Python,
+%mathescape,
+% breaklines,
+%  rulecolor=\color{black},
+%  frame=single,
+%  caption= \textbf{Steady state specification.}
+%]
+%\[ \bigwedge\limits_{i,j} g_{i,j} \supset (e_{i,j,0} == i \land e_{i,j,1} == j) \, \]
+%
+%\end{lstlisting}
+
+\begin{figure}[ht]
+%\vspace{-3mm}
+\begin{verbatim}
+# Set ith jth position and edgeweight to the position of
+  edgeBag[len] array. 
+
+edgePos = 0;
+for(i = 0; i < N; i++) {
+   for(j = 0; j < N; j++) {
+        if (G[i][j] == 1) {
+           edgeBag[edgePos].ith = i;
+           edgeBag[edgePos].jth = j;
+           edgePos = edgePos + 1;
+        }
+   }
+}  
+\end{verbatim}
+\caption{Define the values of the source and target node according to the input graph.}
+\label{code:motivate}
+\end{figure}
+ 
+The plan is simple; we constraint these variable values such that the system rules are followed. We do this by use of a Boolean variables and make that variable as a part of query to make sure that the assignment given after a run will be compatible with the rules specified. This way we can check properties about the system by making sure that basic rules are followed.  
+
+\subsubsection{Steady state condition}
+The steady state condition or homeostasis requirement for the whole system means that each molecule leaving the node on a vesicle should come back to its source node in a cycle, i.e., for every molecule leaving the node there exists a cycle with that molecule present on each of the edges and nodes of the path taken. 
+
 We can state this specification regarding graph-cuts, that is each edge-graph-cut should maintain the inflow-outflow flux or as a property of assignment of molecules, such that each for each leaving molecule there is a cycle where that molecule is present on every edge and hops taken. Required Specification is listed in Listing 1. For efficiency reasons we'll divide the whole case into two as stated in last chapter.
 
 \begin{lstlisting}[language=Python,
@@ -174,145 +310,54 @@ $\forall$ z $\in$ {Nodes} $\forall$ E $\in$ {Edges}: E.source = z $\supset$
 
 \end{lstlisting}
 
-\subsubsection{Mask}
-Now consider associating with each possible edge a mask. That will determine the molecule outflow possibility.
- 
-Lets make a graph that have 3 Nodes representing three compartments . And 1 - 3 (inflow to Node three from 1) 3 - 1 {outflow from three to 1} 3 - 2 { outflow from 3 to 2} , 1 - 2 , 2 - 1 hence total 5 Edges and three Nodes. 
-Three Cycles are preset. 1 - 2 - 1, 1 - 3 - 1, 1 - 3 - 2 - 1. 
-
-\begin{figure}[!ht]
-  \caption{Graph to describe the network structure.}
-  \centering
-   \includegraphics[width=0.85\textwidth]{1.png}
-\end{figure}
-
-There are substances that are present in at a compartment and few/all might be flowing through the a  edges and hence outgoing substance has to be present at the compartment. So we require in this case at least log 5 $\simeq$ 3 substances. 
-Represent the matrix for the substance as a binary switch whether its present in a loop or not. 1 1 1 would mean that that substance is present at all the three loops. Reduce the binary switch to a graph coloring problem and solve the same to find the minimum required color. 
-
-\subsection{Analysis}
-Learning from our previous project where unwindings was really a problem and program was taking too much time before reaching into SAT solving phase we represented graph as 1 dimensional array which have edge between n and n+1\textsuperscript{th} element. 
-
-\begin{lstlisting}[mathescape,
-  breaklines,
-  frame=single,
-  caption= \textbf{Graph encoding.}
-]
-# G[2N]: Graph with width twice as number of nodes.
-# Graph is 3 connected.
-#define N 5
-#define X 2 $\times$ N
-...
-unsigned int G[X];
-\end{lstlisting}
-
-This representation will cause additional book-keeping tasks but was very useful to decrease the loop unwinding in our code. In our Listing to illustrate the code with better readability we will assume that the graph is represented as a two dimensional matrix where G[i][j], G[i][j] = 1; there is an edge between node i and node j.
-
-% \begin{lstlisting}[mathescape,
-%   breaklines,
-%   frame=single,
-%   caption= \textbf{Readable encoding of the graph}
-% ]
-% #define N 5
-% ...
-% _Bool G[N][N];
-% \end{lstlisting}
-
-We represent nodes (compartments in the cell) in the graph as a bitvector of fixed length M (Total types of the molecules), representing information about the presence or absence of the molecule type at the i\textsuperscript{th} place.
-
-We fix the graph as input. Then have created a preprocessing by making the edge as a C programming language structure, that consists of each node having additional information attached to it which we can later use by one lookup. The structure includes source and the target node i,j and bitvector representing the label of the edge (edgeWeight), chosen mask, inclusion and exclusion set.   
-
-\begin{lstlisting}[mathescape,
-  breaklines,
-  frame=single,
-  caption= \textbf{Necessary condition property.}
-]
-# Define a structure to represent the EdgeBag that is a tuple :
-# edgeBag := (i, j, edgeWeight, mask, inclusionSet, exclusionSet)
-struct EdgeBag
- {
-   int ith;
-   int jth;
-   bitvector edgeWeight;
-   bitvector mask;
-   bitvector inclusionSet;
-   bitvector exclusionSet;
- };
- 
-....
-# Create a structure that will contain edges. 
-struct EdgeBag edgeBag[len];     
-\end{lstlisting}
-
-But we still need and initiation of the structure. To initialize we just fix source and target node and allow rest to take an arbitrary value; i.e all possible assignments. Later we'll put constraint on these values and use variable involved in the property check.
-
-\[ \bigwedge\limits_{i,j} g_{i,j} \supset (e_{i,j,p}  \lor r_{j,i,k,1} \lor ... \lor r_{j,i,k,p}) \, \]
-
-\begin{lstlisting}[mathescape,
-  breaklines,
-  frame=single,
-  caption= \textbf{Necessary condition property.}
-]
-# Set ith jth position and edgeweight to the position of
-  edgeBag[len] array. 
-
-edgePos = 0;
-for(i=0; i<N; i++) {
-   for(j=0; j<N; j++) {
-        if (G[i][j] == 1) {
-           edgeBag[edgePos].ith = i;
-           edgeBag[edgePos].jth = j;
-           edgePos = edgePos + 1;
-        }
-   }
-}  
-\end{lstlisting}
- 
-The plan is simple; we constraint these variable values such that the system rules are followed. We do this by use of a Boolean variables and make that variable as a part of query to make sure that the assignment given after a run will be compatible with the rules specified. This way we can check properties about the system by making sure that basic rules are followed.  
-
-\subsubsection{Steady state condition}
-The steady state is similar to the vesicular chapter hence we'll skip the details. But recall the steady state condition or homeostasis requirement for the whole system means that each molecule leaving the node on a vesicle should come back to its source node in a cycle, i.e., for every molecule leaving the node there exists a cycle with that molecule present on each of the edges and nodes of the path taken. 
-
 \subsubsection{Reduce the connection between the edges as 4 color problem based on inclusion and exclusion set}
 Next we specify the inclusion and exclusion set for each edge that is present in the graph. W make sure that the edge  
 
-\begin{lstlisting}[mathescape,
-  breaklines,
-  frame=single,
-  caption= \textbf{Setting inclusion and exclusion masks.}
-]
+\begin{figure}[ht]
+%\vspace{-3mm}
+\begin{verbatim}
 # Specify inclusion and exclusion set for edge that is present in the graph.
 # Add inside the condition of the mask structure possibility.
       
 for(i=0; i < len; i++) {
       edgeBag[i].inclusionSet = edgeBag[i].edgeWeight;
-      edgeBag[i].exclusionSet = nodes[edgeBag[i].ith] & (~ (edgeBag[i].ith)) ;
+      edgeBag[i].exclusionSet = nodes[edgeBag[i].ith] &
+                                    (~ (edgeBag[i].ith)) ;
       
-# Specify what are the possible configuration of the mask possible in the current setting.
+# Specify what are the possible configuration of the
+# mask possible in the current setting.
 # For any edge (mask & compartment config) == edge configuration. 
-     __CPROVER_assume (( nodes[edgeBag[i].ith] & edgeBag[i].mask) == edgeBag[i].edgeWeight); 
-}
-\end{lstlisting}
+     __CPROVER_assume (( nodes[edgeBag[i].ith] & edgeBag[i].mask) 
+                         == edgeBag[i].edgeWeight); 
+}  
+\end{verbatim}
+\caption{Setting inclusion and exclusion masks.}
+\label{code:motivate}
+\end{figure}
 
-
-\begin{lstlisting}[mathescape,
-  breaklines,
-  frame=single,
-  caption= \textbf{Reducing the mask problem to n-color problem.}
-]
+\begin{figure}[ht]
+%\vspace{-3mm}
+\begin{verbatim}
 # Making edge between the present edges to make it a coloring problem
 for(k=0; k<len; k++) {
     for(l=0; (l<len); l++) {
          if(k == l) 
             colorGraph[k][l] = 0 ;
-         else if ((( edgeBag[k].inclusionSet & edgeBag[l].exclusionSet) != 0) ||
-                    ((edgeBag[k].exclusionSet & edgeBag[l].inclusionSet) != 0) ) {
+         else if ((( edgeBag[k].inclusionSet 
+                     & edgeBag[l].exclusionSet) != 0) ||
+                    ((edgeBag[k].exclusionSet
+                     & edgeBag[l].inclusionSet) != 0) ) {
                     colorGraph[k][l] = 1;
 		   }
 		 else 
 			 colorGraph[k][l] = 0; 
     }
-}
-\end{lstlisting}
+} 
+\end{verbatim}
+\caption{Reducing the mask problem to n-color problem.}
+\label{code:motivate}
+\end{figure}
+
 
 Solve four color problem to get the minimum color that is required to solve the prob.  
 
@@ -320,11 +365,10 @@ Have significance to Biology as cell contained max three or four color.
      
      
 Now we have to just solve the n color problem. There are many ways we can achieve simplest is shown in the Listing 
-\begin{lstlisting}[mathescape,
-  breaklines,
-  frame=single,
-  caption= \textbf{Necessary condition property.}
-]
+
+\begin{figure}[ht]
+%\vspace{-3mm}
+\begin{verbatim}
 # Apply the constraints for the finding minimum coloring problem.
 # Constraint1: all nodes are of some color.
 # assignColor(C): C determined how many colors are given and 
@@ -344,7 +388,11 @@ for(i=0; i<len; i++){
           }
     }
 }
-\end{lstlisting}
+\end{verbatim}
+\caption{Constraints for the n-color problem.}
+\label{code:motivate}
+\end{figure}
+
 
 \subsection{Comparison with the simulation method}
 Simulation method was able to handle the total number of nodes till N = 6. Scaling besides this limit was really a challenge. We checked every graph and achieved the same result and in some cases  
